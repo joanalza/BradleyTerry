@@ -2,7 +2,7 @@ Package: metaheuR
 Type: Package
 Title: Package including classical metaheuristics and combinatorial optimization
     problems
-Version: 0.3
+Version: 0.35
 Date: 01-02-2017
 Author: Borja Calvo [aut, cre], Usue Mori [aut], Ander Carreño [ctb], Josu Ceberio [ths], Joan Alza
 Maintainer: Borja Calvo <borja.calvo@ehu.eus>
