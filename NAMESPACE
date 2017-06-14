@@ -15,7 +15,8 @@ exportClasses(
   PermuPosPheromone,
   BayesianNetwork,
   EHBSA,
-  PlackettLuce
+  PlackettLuce,
+  BradleyTerry
 )
 
 exportMethods(
@@ -104,6 +105,7 @@ export(
   bayesianNetwork,
   ehbsa,
   plackettLuce,
+  bradleyTerry,
   generalizedMallowsModel,
   pfspParser
 )
