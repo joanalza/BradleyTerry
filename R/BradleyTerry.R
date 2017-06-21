@@ -32,7 +32,7 @@ bradleyTerry <- function(data, maxIter, ...) {
     maxIter <- 10000
   }
   if(class(data) == "list"){
-    data <- c(data, permutation(rev(data[[1]]@permutation)))
+    #data <- c(data, permutation(rev(data[[1]]@permutation)))
     # We can create the object
     # Transform data to a matrix
     P <- length(data[[1]]@permutation) # Problem size
@@ -40,22 +40,22 @@ bradleyTerry <- function(data, maxIter, ...) {
     X <- P-1 # Pop size
     Y <- 2 #Problem size
     
-    play1 <- c()
-    play2 <- c()
+    player1 <- c()
+    player2 <- c()
     win1 <- c()
     win2 <- c()
     
     for(i in 1:X){
       for(j in Y:P){
-        append(play1,i)
-        append(play2,j)
+        player1 <- c(player1,i)
+        player2 <- c(player2,j)
         val <- checkProb(data, i,j)
-        append(win1, val)
-        append(win2, N - val)
+        win1 <- c(win1, val)
+        win2 <- c(win2, N - val)
       }
       Y <- Y + 1
     }
-    data.frame(play1,play2,win1,win2)
+    return(data.frame(player1,player2,win1,win2))
   }else{
     stop("The data must be a list")
   }
