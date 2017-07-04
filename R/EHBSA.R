@@ -69,4 +69,5 @@ ehbsa <- function(data, bratio, ...) {
 	}else{
 		stop("The data must be a list")
 	}
+  return(obj)
 }
