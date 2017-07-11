@@ -5,7 +5,7 @@
 
 setClass(
   Class = "BradleyTerry",
-  representation = representation(abilities = "numeric", sampling = "character")
+  representation = representation(abilities = "numeric", sampling = "character", indices = "data.frame", burnIn = "numeric")
 )
 # GENERIC METHODS ---------------------------------------------------------
 setMethod(
@@ -23,13 +23,32 @@ setMethod(
         )
       },
       Metropolis = {
-        
+        if (is.numeric(object@burnIn)){
+          burnIn <- 10
+        }
+        abilities <- object@abilities
+        n <- length(abilities)
+        sigma0 <- randomPermutation(n)
+        new.population <- list(sigma0)
+        aux0 <- apply(object@indices, MARGIN = 1, FUN = calcProb, sigma = sigma0, ability = abilities)
+        logprob0 <- sum(aux0)
+        for( i in 1:nsim){
+          for ( j in 1:burnIn){
+            sigma1 <- swap(sigma0, runif(1, min = 1, max = n), runif(1, min = 1, max = n))
+            aux1 <- apply(object@indices, MARGIN = 1, FUN = calcProb, sigma = sigma1, ability = abilities)
+            logprob1 <- sum(aux1)
+            probRatio <- exp(logprob1 - logprob0)
+            if(runif(1) < probRatio){
+              sigma0 <- sigma1
+            }
+          }
+        new.population <- append(new.population, sigma1)
+        }
       },
       Heuristic = {
         
       }
     )
-    
     return(new.population)
   }
 )
@@ -77,13 +96,17 @@ bradleyTerry <- function(data, maxIter, ...) {
           "player", data = d
       )
     obj <-
-      new("BradleyTerry", abilities = BTabilities(model)[,1], sampling = "Random")
+      new("BradleyTerry", abilities = BTabilities(model)[,1], sampling = "Metropolis", indices = d[,1:2])
   }else{
     stop("The data must be a list")
   }
   return (obj)
 }
 
+#' How many times object 1 is earlier than object 2 in a permutation
+#' @param x numeric list (permutation).
+#' @param obj1 number of the list.
+#' @param obj2 number of the list.
 checkProb <- function(x, obj1, obj2) {
   sum <- 0
   N <- length(x)
@@ -95,4 +118,16 @@ checkProb <- function(x, obj1, obj2) {
     }
   }
   return(sum)
+}
+
+#' Calculates probabily of a list
+#' @param vector with two indices
+#' @param permutation (list)
+#' @param probabilities of the elements (abilities)
+calcProb <- function (ind, sigma, ability){
+  i <- as.numeric(ind[1])
+  j <- as.numeric(ind[2])
+  w_sigma_i <- exp(ability[sigma[i]])
+  w_sigma_j <- exp(ability[sigma[j]])
+  return ( log(w_sigma_i / (w_sigma_i + w_sigma_j)) )
 }
