@@ -23,30 +23,37 @@ setMethod(
         )
       },
       Metropolis = {
-        if (is.numeric(object@burnIn)){
-          burnIn <- 10
-        }
         abilities <- object@abilities
         n <- length(abilities)
-        sigma0 <- randomPermutation(n)
-        new.population <- list(sigma0)
-        aux0 <- apply(object@indices, MARGIN = 1, FUN = calcProb, sigma = sigma0, ability = abilities)
-        logprob0 <- sum(aux0)
+        new.population <- list()
         for( i in 1:nsim){
-          for ( j in 1:burnIn){
-            sigma1 <- swap(sigma0, runif(1, min = 1, max = n), runif(1, min = 1, max = n))
+          sigma0 <- randomPermutation(n)
+          aux0 <- apply(object@indices, MARGIN = 1, FUN = calcProb, sigma = sigma0, ability = abilities)
+          logprob0 <- sum(aux0)
+          for ( j in 1:object@burnIn){
+            #browser()
+            ind <- sample(1:n, 2, replace = FALSE)
+            sigma1 <- swap(sigma0, ind[1], ind[2])
             aux1 <- apply(object@indices, MARGIN = 1, FUN = calcProb, sigma = sigma1, ability = abilities)
             logprob1 <- sum(aux1)
             probRatio <- exp(logprob1 - logprob0)
             if(runif(1) < probRatio){
               sigma0 <- sigma1
+              aux0 <- apply(object@indices, MARGIN = 1, FUN = calcProb, sigma = sigma0, ability = abilities)
+              logprob0 <- sum(aux0)
             }
           }
-        new.population <- append(new.population, sigma1)
+          new.population <- append(new.population, sigma0)
         }
       },
       Heuristic = {
-        
+        abilities <- object@abilities
+        n <- length(abilities)
+        order.vec <- sample(1:n)                # Get random order of n elements.
+        new.population <- c(head(order.vec,1))
+        for (i in 2:n){
+          
+        }
       }
     )
     return(new.population)
@@ -62,10 +69,7 @@ setMethod(
 #' @param ... Ignored
 #' @return An object of class \code{\linkS4class{BradleyTerry}} that includes the weight parameter vector of the given data
 #'
-bradleyTerry <- function(data, maxIter, ...) {
-  if (missing(maxIter)) {
-    maxIter <- 10000
-  }
+bradleyTerry <- function(data, burnIn = 100, ...) {
   if (class(data) == "list") {
     P <- length(data[[1]]@permutation) # Problem size
     N <- length(data) # Pop size
@@ -96,7 +100,7 @@ bradleyTerry <- function(data, maxIter, ...) {
           "player", data = d
       )
     obj <-
-      new("BradleyTerry", abilities = BTabilities(model)[,1], sampling = "Metropolis", indices = d[,1:2])
+      new("BradleyTerry", abilities = BTabilities(model)[,1], sampling = "Metropolis", indices = d[,1:2], burnIn = burnIn)
   }else{
     stop("The data must be a list")
   }
@@ -130,4 +134,10 @@ calcProb <- function (ind, sigma, ability){
   w_sigma_i <- exp(ability[sigma[i]])
   w_sigma_j <- exp(ability[sigma[j]])
   return ( log(w_sigma_i / (w_sigma_i + w_sigma_j)) )
+}
+
+#' Esperimentazioa
+getProbability <- function (model, sigma){
+  aux0 <- apply(model@indices, MARGIN = 1, FUN = calcProb, sigma = sigma, ability = model@abilities)
+  return (sum(aux0))
 }

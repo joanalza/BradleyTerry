@@ -107,5 +107,6 @@ export(
   plackettLuce,
   bradleyTerry,
   generalizedMallowsModel,
-  pfspParser
+  pfspParser, 
+  getProbability
 )
