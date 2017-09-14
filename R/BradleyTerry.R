@@ -47,12 +47,46 @@ setMethod(
         }
       },
       Heuristic = {
+        #browser()
         abilities <- object@abilities
         n <- length(abilities)
-        order.vec <- sample(1:n)                # Get random order of n elements.
-        new.population <- c(head(order.vec,1))
-        for (i in 2:n){
-          
+        new.population <- list()
+        for (i in 1:nsim){
+          order.vec <- sample(1:n)                # Get random order of n elements.
+          sigma <- c(head(order.vec,1))
+          #browser()
+          for (j in 2:n){
+            bool.vec <- c()
+            enter.bool <- FALSE
+            new.elem <- order.vec[j]
+            index <- sample(length(sigma),1)
+            while( !enter.bool ){      # Loop infinituak ekiditeko.
+              prob <- exp(abilities[new.elem]) / ( exp(abilities[new.elem]) + exp(abilities[sigma[index]]) )
+              if ( runif(1) >= prob){            # Atzetik jarri behar
+                bool.vec[index] <- 2    #Atzetik aldagaia
+                index <- index + 1
+              }else{
+                bool.vec[index] <- 1    #Aurretik aldagaia
+                index <- index - 1
+              }
+              if (index == 0){
+                sigma <- c(new.elem,sigma)
+                enter.bool <- TRUE
+              }else if (index > length(sigma)){
+                sigma <- c(sigma,new.elem)
+                enter.bool <- TRUE
+              }else if ( !is.na(bool.vec[index]) ){
+                if(bool.vec[index] == 1){
+                  sigma <- c(sigma[1:index - 1],c(new.elem,sigma[index:length(sigma)]))
+                }else{
+                  index <- index + 1
+                  sigma <- c(sigma[1:index - 1],c(new.elem,sigma[index:length(sigma)]))
+                }
+                enter.bool <- TRUE
+              }
+            }
+          }
+          new.population <- append(new.population, permutation(sigma))
         }
       }
     )
@@ -69,7 +103,7 @@ setMethod(
 #' @param ... Ignored
 #' @return An object of class \code{\linkS4class{BradleyTerry}} that includes the weight parameter vector of the given data
 #'
-bradleyTerry <- function(data, burnIn = 100, ...) {
+bradleyTerry <- function(data, burnIn = 100, sampling = "Heuristic", ...) {
   if (class(data) == "list") {
     P <- length(data[[1]]@permutation) # Problem size
     N <- length(data) # Pop size
@@ -100,7 +134,7 @@ bradleyTerry <- function(data, burnIn = 100, ...) {
           "player", data = d
       )
     obj <-
-      new("BradleyTerry", abilities = BTabilities(model)[,1], sampling = "Metropolis", indices = d[,1:2], burnIn = burnIn)
+      new("BradleyTerry", abilities = BTabilities(model)[,1], sampling = sampling, indices = d[,1:2], burnIn = burnIn)
   }else{
     stop("The data must be a list")
   }
