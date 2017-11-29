@@ -177,5 +177,5 @@ calcProb <- function (ind, sigma, ability){
 #' @return probability
 getProbability <- function (model, sigma){
   aux0 <- apply(model@indices, MARGIN = 1, FUN = calcProb, sigma = sigma, ability = model@abilities)
-  return (sum(aux0))
+  return (exp(sum(aux0)))
 }
