@@ -158,10 +158,10 @@ checkProb <- function(x, obj1, obj2) {
   return(sum)
 }
 
-#' Calculates probabily of a list
+#' Calculates probabily of two elements
 #' @param vector with two indices
-#' @param permutation (list)
-#' @param probabilities of the elements (abilities)
+#' @param permutation
+#' @param probabilities of the elements
 calcProb <- function (ind, sigma, ability){
   i <- as.numeric(ind[1])
   j <- as.numeric(ind[2])
@@ -170,7 +170,11 @@ calcProb <- function (ind, sigma, ability){
   return ( log(w_sigma_i / (w_sigma_i + w_sigma_j)) )
 }
 
-#' Esperimentazioa
+#' Calculates probability of a permutation
+#' @param model to take abilities
+#' @param permutation
+#' 
+#' @return probability
 getProbability <- function (model, sigma){
   aux0 <- apply(model@indices, MARGIN = 1, FUN = calcProb, sigma = sigma, ability = model@abilities)
   return (sum(aux0))
