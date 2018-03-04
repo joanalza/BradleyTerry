@@ -16,7 +16,8 @@ exportClasses(
   BayesianNetwork,
   EHBSA,
   PlackettLuce,
-  BradleyTerry
+  BradleyTerry,
+  MixedPLBT
 )
 
 exportMethods(
@@ -109,5 +110,6 @@ export(
   generalizedMallowsModel,
   pfspParser, 
   getProbability,
-  calcProb
+  calcProb,
+  mixedPLBT
 )

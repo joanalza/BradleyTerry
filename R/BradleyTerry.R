@@ -11,7 +11,7 @@ setClass(
 setMethod(
   f = "simulate",
   signature = "BradleyTerry",
-  definition = function(object, nsim = 1, seed = NULL, ...) {
+  definition = function(object, nsim = 1, seed = NULL, burnIn, ...) {
     switch(
       object@sampling,
       Random = {
@@ -30,7 +30,7 @@ setMethod(
           sigma0 <- randomPermutation(n)
           aux0 <- apply(object@indices, MARGIN = 1, FUN = calcProb, sigma = sigma0, ability = abilities)
           logprob0 <- sum(aux0)
-          for ( j in 1:object@burnIn){
+          for ( j in 1:burnIn){
             #browser()
             ind <- sample(1:n, 2, replace = FALSE)
             sigma1 <- swap(sigma0, ind[1], ind[2])
@@ -103,7 +103,7 @@ setMethod(
 #' @param ... Ignored
 #' @return An object of class \code{\linkS4class{BradleyTerry}} that includes the weight parameter vector of the given data
 #'
-bradleyTerry <- function(data, burnIn = 100, sampling = "Heuristic", ...) {
+bradleyTerry <- function(data, burnIn = 1, sampling = "Heuristic", ...) {
   if (class(data) == "list") {
     P <- length(data[[1]]@permutation) # Problem size
     N <- length(data) # Pop size
